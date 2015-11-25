@@ -1,5 +1,4 @@
 namespace :portus do
-
   desc "Create the account used by Portus to talk with Registry's API"
   task create_api_account: :environment do
     User.create!(
@@ -7,6 +6,23 @@ namespace :portus do
       password: Rails.application.secrets.portus_password,
       email:    "portus@portus.com",
       admin:    true
+    )
+  end
+
+  desc "Create a user"
+  task :create_user, [:username, :email, :password, :admin] => :environment do |_, args|
+    args.each do |k, v|
+      if v.empty?
+        puts "You have to provide a value for `#{k}'"
+        exit(-1)
+      end
+    end
+
+    User.create!(
+      username: args["username"],
+      password: args["password"],
+      email:    args["email"],
+      admin:    args["admin"]
     )
   end
 
@@ -33,5 +49,4 @@ namespace :portus do
       exit(-3)
     end
   end
-
 end

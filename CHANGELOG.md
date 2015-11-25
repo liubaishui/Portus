@@ -1,5 +1,25 @@
 ## Upcoming Version
 
+- The signup form can be disabled via a configuration option. See PR
+[#569](https://github.com/SUSE/Portus/pull/569),
+[#594](https://github.com/SUSE/Portus/pull/594),
+[#543](https://github.com/SUSE/Portus/pull/543) and
+[#568](https://github.com/SUSE/Portus/pull/568).
+- Users will be offered in an autocompletion widget when adding a new team
+  member. See PR [#547](https://github.com/SUSE/Portus/pull/547).
+- Portus now also tracks the digest of pushed images.
+  See PR [#556](https://github.com/SUSE/Portus/pull/556). This is a first step
+  into fixing the issue #512.
+- Teams can be renamed. See PR [#536](https://github.com/SUSE/Portus/pull/536).
+- Users can be created from the admin page.
+  See PR [543](https://github.com/SUSE/Portus/pull/543). This is a first step
+  into fixing the issues #283 and #179.
+- Team and namespace descriptions can be written using Markdown. See pull
+  requests: [#546](https://github.com/SUSE/Portus/pull/546) and
+  [#531](https://github.com/SUSE/Portus/pull/531).
+
+## 2.0.0
+
 - Portus will now check whether a Registry is reachable or not.
 See PR [#437](https://github.com/SUSE/Portus/pull/437).
 - Namespaces and teams have a description field. See PR
@@ -17,6 +37,8 @@ login. See PR [#330](https://github.com/SUSE/Portus/pull/330).
 password. See PR [#325](https://github.com/SUSE/Portus/pull/325).
 - Set admin user from a rake task and disable first-user is admin. See PR [#314]
   (https://github.com/SUSE/Portus/pull/314)
+- Added a configuration option to specify the expiration time for JWT tokens
+issued by Portus. See PR [518](https://github.com/SUSE/Portus/pull/518).
 - Review requirements and provides in the RPM
 PR [#277](https://github.com/SUSE/Portus/pull/277),
 PR [#278](https://github.com/SUSE/Portus/pull/278),

@@ -227,6 +227,7 @@ describe Repository do
 
     context "not global repository" do
       let(:namespace_name) { "suse" }
+      let(:digest) { "digest" }
 
       before :each do
         name = "#{namespace_name}/#{repository_name}"
@@ -234,7 +235,7 @@ describe Repository do
         @event = build(:raw_push_manifest_event).to_test_hash
         @event["target"]["repository"] = name
         @event["target"]["url"] = get_url(name, tag_name)
-        @event["target"]["digest"] = "digest"
+        @event["target"]["digest"] = digest
         @event["request"]["host"] = registry.hostname
         @event["actor"]["name"] = user.username
       end
@@ -266,6 +267,7 @@ describe Repository do
           expect(repository.name).to eq(repository_name)
           expect(repository.tags.count).to eq 1
           expect(repository.tags.first.name).to eq tag_name
+          expect(repository.tags.first.digest).to eq digest
           expect(repository.tags.find_by(name: tag_name).author).to eq(user)
         end
 
@@ -333,6 +335,21 @@ describe Repository do
       # Trying to create a repo into an unknown namespace.
       repo = { "name" => "unknown/repo1", "tags" => ["latest", "0.1"] }
       expect(Repository.create_or_update!(repo)).to be_nil
+    end
+
+    it "dosnt remove tags of same name for different repo" do
+      # create "latest" for repo1 and repo2
+      event_one = { "name" => "#{namespace.name}/repo1", "tags" => ["latest"] }
+      Repository.create_or_update!(event_one)
+      event_two = { "name" => "#{namespace.name}/repo2", "tags" => ["latest"] }
+      Repository.create_or_update!(event_two)
+
+      # remove "latest" for repo2
+      event_three = { "name" => "#{namespace.name}/repo2", "tags" => ["other"] }
+      Repository.create_or_update!(event_three)
+
+      expect(repo1.tags.pluck(:name)).to include("latest")
+      expect(repo2.tags.pluck(:name)).not_to include("latest")
     end
   end
 end

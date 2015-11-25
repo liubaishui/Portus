@@ -1,6 +1,8 @@
 require "rails_helper"
 
 RSpec.describe TeamsController, type: :controller do
+  render_views
+
   let(:valid_attributes) do
     { name: "qa team", description: "short test description" }
   end
@@ -105,21 +107,49 @@ RSpec.describe TeamsController, type: :controller do
   end
 
   describe "PATCH #update" do
-    it "does not allow to change the description by viewers and contributers" do
+    it "does not allow to change the description or the team name by viewers and contributers" do
       disallowed_roles = ["viewer", "contributer"]
       disallowed_roles.each do |role|
         user = create(:user)
         TeamUser.create(team: team, user: user, role: TeamUser.roles[role])
         sign_in user
-        patch :update, id: team.id, team: { description: "new description" }, format: "js"
+        patch :update, id: team.id, team: { name:        "new name",
+                                            description: "new description" }, format: "js"
         expect(response.status).to eq(401)
       end
     end
 
     it "does allow to change the description by owners" do
       sign_in owner
-      patch :update, id: team.id, team: { description: "new description" }, format: "js"
+      patch :update, id: team.id, team: { name:        "new name",
+                                          description: "new description" }, format: "js"
       expect(response.status).to eq(200)
+    end
+  end
+
+  describe "typeahead" do
+    it "does allow to search for valid users by owners" do
+      sign_in owner
+      get :typeahead, id: team.id, query: "user", format: "json"
+      expect(response.status).to eq(200)
+      user1 = create(:user)
+      create(:user, username: "user2")
+      TeamUser.create(team: team, user: user1, role: TeamUser.roles["viewer"])
+      get :typeahead, id: team.id, query: "user", format: "json"
+      usernames = JSON.parse(response.body)
+      expect(usernames.length).to eq(1)
+      expect(usernames[0]["name"]).to eq("user2")
+    end
+
+    it "does not allow to search by contributers or viewers" do
+      disallowed_roles = ["viewer", "contributer"]
+      disallowed_roles.each do |role|
+        user = create(:user)
+        TeamUser.create(team: team, user: user, role: TeamUser.roles[role])
+        sign_in user
+        get :typeahead, id: team.id, query: "user", format: "js"
+        expect(response.status).to eq(401)
+      end
     end
   end
 
@@ -142,15 +172,31 @@ RSpec.describe TeamsController, type: :controller do
     it "editing of a team description" do
       old_description = team.description
       expect do
-        patch :update, id: team.id, team: { description: "new description" }, format: "js"
+        patch :update, id: team.id, team: { name:        team.name,
+                                            description: "new description" }, format: "js"
       end.to change(PublicActivity::Activity, :count).by(1)
 
       team_description_activity = PublicActivity::Activity.find_by(
         key: "team.change_team_description")
       expect(team_description_activity.owner).to eq(owner)
       expect(team_description_activity.trackable).to eq(team)
-      expect(team_description_activity.parameters[:old_description]).to eq(old_description)
-      expect(team_description_activity.parameters[:new_description]).to eq("new description")
+      expect(team_description_activity.parameters[:old]).to eq(old_description)
+      expect(team_description_activity.parameters[:new]).to eq("new description")
+    end
+
+    it "editing of the team name" do
+      old_name = team.name
+      expect do
+        team_attributes = { name: "new name", description: team.description }
+        patch :update, id: team.id, team: team_attributes, format: "js"
+      end.to change(PublicActivity::Activity, :count).by(1)
+
+      team_name_activity = PublicActivity::Activity.find_by(
+        key: "team.change_team_name")
+      expect(team_name_activity.owner).to eq(owner)
+      expect(team_name_activity.trackable).to eq(team)
+      expect(team_name_activity.parameters[:old]).to eq(old_name)
+      expect(team_name_activity.parameters[:new]).to eq("new name")
     end
   end
 end

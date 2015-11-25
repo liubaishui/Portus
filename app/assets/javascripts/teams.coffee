@@ -1,4 +1,20 @@
 $(document).on "page:change", ->
+
+  set_typeahead = (url) ->
+    $('.remote .typeahead').typeahead 'destroy'
+    bloodhound = new Bloodhound(
+        datumTokenizer: Bloodhound.tokenizers.obj.whitespace('name'),
+        queryTokenizer: Bloodhound.tokenizers.whitespace,
+        remote:
+          cache: false,
+          url: url,
+          wildcard: '%QUERY'
+      )
+    bloodhound.initialize()
+    $('.remote .typeahead').typeahead null,
+      displayKey: 'name',
+      source: bloodhound.ttAdapter()
+
   $('#add_team_user_btn').on 'click', (event) ->
     $('#team_user_user').val('')
     $('#team_user_role').val('viewer')
@@ -12,23 +28,29 @@ $(document).on "page:change", ->
         $('#add_team_user_btn i').removeClass("fa-minus-circle")
         $('#add_team_user_btn i').addClass("fa-plus-circle")
         layout_resizer()
+    team_id = $('.remote').attr('id')
+    set_typeahead(team_id  +  '/typeahead/%QUERY')
+
+  open_close_icon = (icon) ->
+    if icon.hasClass('fa-close')
+      icon.removeClass('fa-close')
+      icon.addClass('fa-pencil')
+    else
+      icon.removeClass('fa-pencil')
+      icon.addClass('fa-close')
 
   $('body').on('click', '.btn-edit-role', (event) ->
     el = $(this).find('i.fa')
-    if el.hasClass('fa-pencil')
-      el.removeClass('fa-pencil')
-      el.addClass('fa-close')
-    else
-      el.removeClass('fa-close')
-      el.addClass('fa-pencil')
     if $(this).hasClass('add')
+      open_close_icon(el)
       $('#team_user_' + event.currentTarget.value + ' td .role').toggle()
       $('#change_role_team_user_' + event.currentTarget.value).toggle()
-    else if $(this).hasClass('button_team_description')
-      $('.description').toggle()
-      $('#change_description_team_' + event.currentTarget.value).toggle().trigger('focus')
-      $('#team_description').focus()
+    else if $(this).hasClass('button_edit_team')
+      $('.team_information').toggle()
+      $('#update_team_' + event.currentTarget.value).toggle()
+      $('#team_name').focus()
     else if $(this).hasClass('button_namespace_description')
+      open_close_icon(el)
       $('.description').toggle()
       $('#change_description_namespace_' + event.currentTarget.value).toggle()
       $('#namespace_description').focus()
@@ -52,6 +74,7 @@ $(document).on "page:change", ->
         $('#add_namespace_btn i').removeClass("fa-minus-circle")
         $('#add_namespace_btn i').addClass("fa-plus-circle")
         layout_resizer()
+    set_typeahead('/namespaces/typeahead/%QUERY')
 
   $('#add_team_btn').on 'click', (event) ->
     $('#team_name').val('')

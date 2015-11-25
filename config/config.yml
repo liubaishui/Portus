@@ -1,7 +1,7 @@
 # This file contains the default values for the configuration of this
 # application. In order to change them, write your own config-local.yml file
 # (it will be ignored by git). For more info, you can read the dedicated page
-# on the wiki: https://github.com/SUSE/Portus/wiki/Configuring-Portus.
+# here: http://port.us.org/docs/Configuring-Portus.html.
 
 # Settings for the Portus mailer.
 email:
@@ -77,6 +77,14 @@ ldap:
 #   rake portus:make_admin[USERNAME]
 # in order to set the admin user
 first_user_admin:
+  enabled: true
+
+# If enabled, then users can signup with the signup form. Otherwise, the admin
+# is responsible of creating new users by either:
+#   - Using the "portus:create_user" rake task.
+#   - Using the form available in the admin panel.
+# This is ignored if LDAP is enabled.
+signup:
   enabled: true
 
 # By default require ssl to be enabled when running on production

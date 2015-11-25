@@ -8,8 +8,7 @@
       - if can_manage_namespace?(@namespace)
         .pull-right
           button.btn.btn-link.btn-xs.btn-edit-role[
-            value="#{@namespace.id}",
-            class="button_namespace_description"]
+            value="#{@namespace.id}" class="button_namespace_description"]
             i.fa.fa-pencil.fa-lg
             | Edit namespace
       small
@@ -26,10 +25,10 @@
         p
           'No description has been posted yet.
       - else
-        '#{@namespace.description}
+        = markdown(@namespace.description)
     .collapse id="change_description_namespace_#{@namespace.id}"
       = form_for @namespace, remote: true, html: {role: 'form'} do |f|
-        = f.text_area(:description, class: 'form-control', placeholder: "#{@namespace.description}")
+        = f.text_area(:description, class: 'form-control', placeholder: html_escape(@namespace.description))
         br
           = button_tag(type: 'submit', class: 'btn btn-primary pull-right') do
             i.fa.fa-check
@@ -45,8 +44,8 @@
       strong
         = @namespace.clean_name
     h6.label.label-info
-      | Belongs to:
-      = " #{@namespace.team.name}"
+      | <span>Belongs to: </span>
+      = link_to "#{@namespace.team.name}", @namespace.team
   .panel-body
     .table-responsive
       table.table.table-stripped.table-hover

@@ -15,11 +15,17 @@ feature "Login feature" do
 
   scenario "It does show a warning for the admin creation in LDAP support", js: true do
     User.delete_all
+    APP_CONFIG["first_user_admin"] = { "enabled" => false }
     APP_CONFIG["ldap"] = { "enabled" => true }
     visit new_user_session_path
 
-    expect(page).to have_content("The first user to be created will have admin permissions !")
+    expect(page).to_not have_content("The first user to be created will have admin permissions !")
     expect(page).to_not have_content("Create a new account")
+
+    APP_CONFIG["first_user_admin"] = { "enabled" => true }
+    visit new_user_session_path
+
+    expect(page).to have_content("The first user to be created will have admin permissions !")
 
     create(:admin)
 
@@ -64,6 +70,21 @@ feature "Login feature" do
     expect(page).to have_content(user.inactive_message)
     expect(page).to have_content("Login")
     expect(current_path).to eq new_user_session_path
+  end
+
+  scenario "Sign up is disabled", js: true do
+    APP_CONFIG["signup"] = { "enabled" => true }
+
+    visit root_path
+    expect(current_path).to eq root_path
+    expect(page).to have_content("Create a new account")
+
+    APP_CONFIG["signup"] = { "enabled" => false }
+
+    visit root_path
+    expect(current_path).to eq root_path
+    expect(page).to have_content("I forgot my password")
+    expect(page).to_not have_content("Create a new account")
   end
 
   describe "User is lockable" do

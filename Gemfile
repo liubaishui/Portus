@@ -1,7 +1,7 @@
 source "https://rubygems.org"
 
 gem "rails", "~> 4.2.2"
-gem "jquery-rails", "~> 4.0.4"
+gem "jquery-rails"
 gem "sass-rails", ">= 3.2"
 gem "slim"
 gem "pundit"
@@ -19,6 +19,8 @@ gem "kaminari"
 gem "crono"
 gem "net-ldap"
 gem "redcarpet"
+gem "font-awesome-rails"
+gem "bootstrap-typeahead-rails"
 
 # This is already a Rails dependency, but we use it to run portusctl
 gem "thor"

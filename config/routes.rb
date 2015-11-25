@@ -1,10 +1,15 @@
 Rails.application.routes.draw do
   resources :errors, only: [:show]
-  resources :teams, only: [:index, :show, :create, :update]
+  resources :teams, only: [:index, :show, :create, :update] do
+    member do
+      get "typeahead/:query" => "teams#typeahead", :defaults => { format: "json" }
+    end
+  end
   resources :team_users, only: [:create, :destroy, :update]
   resources :namespaces, only: [:create, :index, :show, :update] do
     put "toggle_public", on: :member
   end
+  get "namespaces/typeahead/:query" => "namespaces#typeahead", :defaults => { format: "json" }
 
   resources :repositories, only: [:index, :show] do
     post :toggle_star, on: :member
@@ -39,7 +44,7 @@ Rails.application.routes.draw do
     resources :registries, except: [:show, :destroy]
     resources :namespaces, only: [:index]
     resources :teams, only: [:index]
-    resources :users, only: [:index] do
+    resources :users, only: [:index, :create, :new] do
       put "toggle_admin", on: :member
     end
   end
